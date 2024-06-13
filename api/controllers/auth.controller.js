@@ -1,6 +1,7 @@
 import becryptjs from "bcryptjs";
 
 import User from "../models/user.model.js";
+import { errorHandler } from "../utils/error.js";
 
 export const signup = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -13,7 +14,7 @@ export const signup = async (req, res, next) => {
     email === "" ||
     password === ""
   ) {
-    return res.status(400).json({ message: "All fields are required" });
+    next(errorHandler(400, "All fields are required"));
   }
 
   const hashedPassword = becryptjs.hashSync(password, 10);
@@ -28,6 +29,6 @@ export const signup = async (req, res, next) => {
     await newUser.save();
     res.json({ success: true, status: 200, message: "Signup Successful" });
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 };
