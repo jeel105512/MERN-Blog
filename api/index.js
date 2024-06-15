@@ -1,10 +1,12 @@
-import express from "express";
+import express, { urlencoded } from "express";
 import MongooseSetup from "./lib/MongooseSetup.js";
 import RoutesSetup from "./lib/RoutesSetup.js";
+import PassportSetup from "./lib/PassportSetup.js";
 
 const app = express();
 
 app.use(express.json());
+app.use(urlencoded({ extended: true }));
 
 MongooseSetup();
 
@@ -13,6 +15,8 @@ app.listen(3000, () => {
 });
 
 RoutesSetup(app);
+
+PassportSetup(app);
 
 app.use((error, req, res, next) => {
   const statusCode = error.statusCode || 500;
