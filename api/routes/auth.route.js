@@ -2,7 +2,7 @@ import express from "express";
 
 import {
   signup,
-  login,
+  signin,
   varifyJWTToken,
 } from "../controllers/auth.controller.js";
 
@@ -22,6 +22,6 @@ router.get("/varify-JWT-Token", varifyJWTToken, (req, res) => {
 
 router.post("/signup", signup);
 
-router.post("/login", login);
+router.post("/signin", signin);
 
 export default router;

@@ -33,20 +33,26 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res, next) => {
+export const signin = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(errorHandler(400, "All fields are required"));
+  }
+
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email });
 
     if (!user) {
       return next(errorHandler(401, "Could not find the user!"));
     }
 
-    if (!bcryptjs.compareSync(req.body.password, user.password)) {
+    if (!bcryptjs.compareSync(password, user.password)) {
       return next(errorHandler(401, "Incorrect Password!"));
     }
 
     const payload = {
-      id: user.id,
+      id: user._id,
       name: user.name,
       email: user.email,
     };
@@ -66,4 +72,4 @@ export const login = async (req, res, next) => {
   }
 };
 
-export const varifyJWTToken = passport.authenticate("jwt", {session: false});
+export const varifyJWTToken = passport.authenticate("jwt", { session: false });

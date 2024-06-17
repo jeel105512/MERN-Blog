@@ -82,7 +82,7 @@ export default function Signup() {
               <Label value="Your Password" />
               <TextInput
                 type="password"
-                placeholder="a1s2d3f4"
+                placeholder="*******"
                 id="password"
                 onChange={handleChange}
               />
