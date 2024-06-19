@@ -1,12 +1,16 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
 
 export default function VarifyJWTToken() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const varifyToken = async () => {
             try {
+                dispatch(signInStart());
                 const token = localStorage.getItem("token");
                 const response = await fetch("/api/auth/varify-JWT-Token", {
                     headers: {
@@ -15,9 +19,10 @@ export default function VarifyJWTToken() {
                 });
                 const data = await response.json();
                 console.log(data.user);
+                dispatch(signInSuccess(data.user));
                 navigate("/");
             } catch (error) {
-                console.error(error);
+                dispatch(signInFailure(error.message));
                 navigate("/sign-in");
             }
         }

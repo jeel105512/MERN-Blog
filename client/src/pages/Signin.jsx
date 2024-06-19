@@ -1,11 +1,13 @@
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { signInStart, signInSuccess, signInFailure } from "../redux/user/userSlice";
 
 export default function Signin() {
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { loading, error: errorMessage } = useSelector(state => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -16,12 +18,11 @@ export default function Signin() {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
-      return setError("Please fill out all fields.");
+      return dispatch(signInFailure("Please fill all the fields."));
     }
 
     try {
-      setLoading(true);
-      setError(null);
+      dispatch(signInStart());
       const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -33,19 +34,16 @@ export default function Signin() {
       const data = await response.json();
 
       if (data.success === false) {
-        return setError(data.message);
+        dispatch(signInFailure(data.message));
       }
 
-      setLoading(false);
       if (response.ok) {
         console.log(data);
         localStorage.setItem("token", data.token);
         navigate("/VarifyJWTToken");
       }
     } catch (error) {
-      console.error(error);
-      setError(error.message);
-      setLoading(false);
+      dispatch(signInFailure(error.message));
     }
   }
 
@@ -94,7 +92,7 @@ export default function Signin() {
             <Link to="/sign-up" className="text-blue-500">Sign Up</Link>
           </div>
           {
-            error && (<Alert className="mt-5" color="failure">{error}</Alert>)
+            errorMessage && (<Alert className="mt-5" color="failure">{errorMessage}</Alert>)
           }
         </div>
       </div>
