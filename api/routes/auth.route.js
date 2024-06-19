@@ -4,6 +4,7 @@ import {
   signup,
   signin,
   varifyJWTToken,
+  google,
 } from "../controllers/auth.controller.js";
 
 const router = express.Router();
@@ -23,5 +24,7 @@ router.get("/varify-JWT-Token", varifyJWTToken, (req, res) => {
 router.post("/signup", signup);
 
 router.post("/signin", signin);
+
+router.post("/google", google);
 
 export default router;
