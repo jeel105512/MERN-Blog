@@ -8,8 +8,39 @@ import Projects from "./pages/Projects.jsx";
 import Header from "./components/Header/Header.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import VarifyJWTToken from "./pages/VarifyJWTToken.jsx";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { signInFailure, signInSuccess } from "./redux/user/userSlice.js";
 
 export default function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const response = await fetch("/api/auth/varify-JWT-Token", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            }
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            dispatch(signInSuccess(data.user));
+          } else {
+            dispatch(signInFailure(data.message));
+          }
+        }
+      } catch (error) {
+        dispatch(signInFailure(error.message));
+      }
+    }
+    init();
+  }, [dispatch]);
+
   return (
     <Router>
       <Header />

@@ -72,33 +72,52 @@ export const signin = async (req, res, next) => {
   }
 };
 
-export const varifyJWTToken = passport.authenticate("jwt", { session: false });
+export const varifyJWTToken = (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    req.user = user;
+    next();
+  })(req, res, next);
+};
 
 export const google = async (req, res, next) => {
   const { name, email, googlePhotoURL } = req.body;
   try {
     const user = await User.findOne({ email });
 
-    // user exists, signin
     if (user) {
+      // user exists, signin
+      const payload = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      };
+
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: "1d",
       });
 
       const { password, ...userInfo } = user._doc;
 
-      res
-        .status(200)
-        .cookie("access_token", token, {
-          httpOnly: true,
-        })
-        .json(userInfo);
+      res.status(200).json({
+        success: true,
+        status: 200,
+        message: "Login Successful",
+        token: `Bearer ${token}`,
+        user: userInfo,
+      });
     } else {
       // user does not exist, signup
       const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+
       const newUser = new User({
         name:
           name.toLowerCase().split(" ").join("") +
@@ -107,16 +126,28 @@ export const google = async (req, res, next) => {
         password: hashedPassword,
         profilePitcure: googlePhotoURL,
       });
+
       await newUser.save();
-      
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      const { passport, ...userInfo } = newUser._doc;
-      res
-        .status(200)
-        .cookie("access_token", token, {
-          httpOnly: true,
-        })
-        .json(userInfo);
+
+      const payload = {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      const { passwort, ...userInfo } = newUser._doc;
+
+      return res.status(200).json({
+        success: true,
+        status: 200,
+        message: "Signup Successful",
+        token: `Bearer ${token}`,
+        user: userInfo,
+      });
     }
   } catch (error) {
     next(error);

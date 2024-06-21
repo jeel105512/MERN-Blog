@@ -18,9 +18,13 @@ export default function VarifyJWTToken() {
                     }
                 });
                 const data = await response.json();
-                console.log(data.user);
-                dispatch(signInSuccess(data.user));
-                navigate("/");
+                if(response.ok) {
+                    console.log(data.user);
+                    dispatch(signInSuccess(data.user));
+                    navigate("/");
+                } else {
+                    dispatch(signInFailure(data.message));
+                }
             } catch (error) {
                 dispatch(signInFailure(error.message));
                 navigate("/sign-in");

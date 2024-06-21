@@ -29,8 +29,9 @@ export default function OAuth() {
             });
             const data = await response.json();
             if (response.ok) {
-                dispatch(signInSuccess(data));
-                navigate("/");
+                localStorage.setItem("token", data.token);
+                dispatch(signInSuccess(data.user));
+                navigate("/VarifyJWTToken");
             }
         } catch (error) {
             console.error(error);
